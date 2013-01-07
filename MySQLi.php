@@ -1,6 +1,6 @@
 <?php
 
-class xi {
+class DBi {
 
   var $host     = "";
   var $username = "";
@@ -8,6 +8,8 @@ class xi {
   var $database = "";
   
   var $mysqli;
+  
+  var $db_error	= "";
 
   public function __construct( $un , $pw , $h) {
     $this->username = $un;
@@ -18,7 +20,7 @@ class xi {
   function connect( $db ) {
     //Set the current database
     $this->database = $db;
-  	
+		
     //Initiate MySQLi object
     $this->mysqli = mysqli_init();
 
@@ -27,31 +29,42 @@ class xi {
 		
     //Incase there is an error
     if (mysqli_connect_error()) {
-    	die('Connect Error (' . mysqli_connect_errno() . ') ' . mysqli_connect_error());
+    	return 'Connect Error (' . mysqli_connect_errno() . ') ' . mysqli_connect_error();
     }
-	}
+  }
 
   function select( $query ) {
+  	global $_app_settings;
+  		
 		$results = array();
     
 		$stmt = $this->mysqli->prepare( $query );
+
+		$this->db_error = $this->mysqli->error;
+		if( $_app_settings['environment'] == 'DEVELOPMENT' )
+			$this->throwDBError( );
+			
 		$row = self::bind_result_array( $stmt );
-    $stmt->execute();
+		$stmt->execute();
+		while ( $stmt->fetch() ) {
+			$results[] = self::getCopy( $row );
+		}
 
-    while ( $stmt->fetch() ) {
-      $results[] = self::getCopy( $row );
-    }
+		$stmt->close();
+		
 
-    $stmt->close();
-
-    return $results;
-
+		return $results;
   }
 
   function query( $query ){
     $executed = false;
 
     $stmt = $this->mysqli->prepare( $query );
+    
+    $this->db_error = $this->mysqli->error;
+	if( $_app_settings['environment'] == 'DEVELOPMENT' )
+		$this->throwDBError( );
+    
     $executed = $stmt->execute();
     $stmt->close();
 
@@ -95,6 +108,14 @@ class xi {
     return $obj;
   }
 		
+
+  public function throwDBError() {
+	  
+	  if( $this->db_error ) {
+		  echo '<h3 style="margin-bottom: 0px;">Database Error:</h3><br />'.$this->db_error;
+		  die();
+	  }
+  }
 
 
 }
