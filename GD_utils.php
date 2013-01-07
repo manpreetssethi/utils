@@ -1,7 +1,7 @@
 <?php
 
 /*
-  GD_utils
+	GD_utils
 	*The class is an abstract layer over the GD librar php provides
 	*Provides the most basic features to create/save/echo an image,
 	*place text on the image & place an image over the source image
@@ -29,11 +29,13 @@
 
 class GD_utils {
 	private static $img_format		= 'PNG';			//Default image format (Output)
-	private static $img_quality		= 9;				//0-9 (Compression, less the number, poorer the quality)
+	private static $img_quality		= 1;				//0-9 (Compression, less the number, poorer the quality)
 	
 	var $img;					//Image resource
 	var $width, $height;		//Width & height
 	var $background_image;		//Background image path
+	var $filename;				//Filename on saving the image
+	var $img_url;				//URL on saving the image
 	var $resources = array();	//Resources used for Image manipulation, is used in the destructor
 	
 	function __construct( $w, $h, $bg = '' ) {		
@@ -124,24 +126,37 @@ class GD_utils {
 	}
 
 	public function save_image( $save_path ) {
+		$this->filename = md5( time() );
+
 		switch( self::$img_format ) {
 			
 			case 'PNG':
-				imagepng( $this->img, $save_path.md5( time() ).'.png', self::$img_quality );
+				$this->filename .= '.png';
+				imagepng( $this->img, ROOT.$save_path.$this->filename, self::$img_quality );
 			break;
 			
 			case 'GIF':
-				imagegif( $this->img, $save_path.md5( time() ).'.gif' );
+				$this->filename .= '.gif';
+				imagegif( $this->img, ROOT.$save_path.$this->filename );
 			break;
 			
 			case 'JPEG':
-				imagejpeg( $this->img, $save_path.md5( time() ).'.jpeg', self::$img_quality );
+				$this->filename .= '.jpeg';
+				imagejpeg( $this->img, ROOT.$save_path.$this->filename, self::$img_quality );
 			break;
 			
 		}
 
+		$this->img_url	= HOST.$save_path.$this->filename;
+
+		return $this->img_url;
+
 	}
 	
+	/*
+		TODO: Need to check if constructor can be called, doesn't work as of yet
+	*/
+
 	public function echo_image( ) {
 		switch( self::$img_format ) {
 			
