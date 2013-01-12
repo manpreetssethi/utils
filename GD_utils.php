@@ -88,11 +88,15 @@ class GD_utils {
 		color		=> Array( Red, Green, Blue ) (RGB values)
 	*/
 	
-	public function place_text( $text, $font, $font_size, $angle, $x, $y, $color ) {
+	public function place_text( $text, $font, $font_size, $angle, $x, $y, $color, $center_align = false ) {
+		if( $center_align ) {	
+			$text_box = self::calculate_text_box( $text, $font, $font_size, $angle);
+			$center_x = ( $this->width - $text_box['width'] ) / 2;
+		}
 		
 		$this->resources['text_color'] = $text_color = imagecolorallocate( $this->img, $color['r'], $color['g'], $color['b'] );
 		
-		imagettftext($this->img, $font_size, $angle, $x, $y, $text_color, $font, $text);
+		imagettftext($this->img, $font_size, $angle, ( $center_align ? $center_x : $x ), $y, $text_color, $font, $text);
 	}
 
 	/*
@@ -175,6 +179,28 @@ class GD_utils {
 		}
 
 	}
+
+	private function calculate_text_box( $text, $fontFile, $fontSize, $fontAngle ) {
+		/************
+			simple function that calculates the *exact* bounding box (single pixel precision).
+			The function returns an associative array with these keys:
+			left, top:  coordinates you will pass to imagettftext
+			width, height: dimension of the image you have to create
+		*************/
+		$rect = imagettfbbox($fontSize,$fontAngle,$fontFile,$text);
+		$minX = min(array($rect[0],$rect[2],$rect[4],$rect[6]));
+		$maxX = max(array($rect[0],$rect[2],$rect[4],$rect[6]));
+		$minY = min(array($rect[1],$rect[3],$rect[5],$rect[7]));
+		$maxY = max(array($rect[1],$rect[3],$rect[5],$rect[7]));
+	   
+		return array(
+			"left"   => abs($minX) - 1,
+			"top"    => abs($minY) - 1,
+			"width"  => $maxX - $minX,
+			"height" => $maxY - $minY,
+			"box"    => $rect
+		);
+	} 
 	
 }
 
