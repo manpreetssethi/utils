@@ -21,6 +21,10 @@ $_app_settings['memcache']['use']   = true;
 $_app_settings['memcache']['host']  = '127.0.0.1';
 $_app_settings['memcache']['port']  = 11211;
 
+//The memache object
+$memcache = new Memcache;
+$memcache->connect( $_app_settings['memcache']['host'], $_app_settings['memcache']['port'] );
+
 */
 
 class Session_manager {
