@@ -1,5 +1,13 @@
 <?php
 
+/*
+	This class assumes a global settings variable;
+	
+	$_app_settings = array();
+	$_app_settings['environment'] = 'DEVELOPMENT'; // OR PRODUCTION
+
+*/
+
 class DBi {
 
   var $host     = "";
