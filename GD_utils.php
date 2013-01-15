@@ -2,7 +2,7 @@
 
 /*
 	GD_utils
-	*The class is an abstract layer over the GD librar php provides
+	*The class is an abstract layer over the GD library php provides
 	*Provides the most basic features to create/save/echo an image,
 	*place text on the image & place an image over the source image
 
